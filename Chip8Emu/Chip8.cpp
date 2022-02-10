@@ -56,6 +56,12 @@ void Chip8::Init()
 		memory[i] = 0;
 	}
 
+	//clear key
+	for (int i = 0; i < 16; ++i)
+	{
+		key[i] = 0;
+	}
+
 	// load fontset
 	for (unsigned int i = 0; i < FONT_SIZE; ++i)
 	{
@@ -386,40 +392,18 @@ void Chip8::Opcode_Fx0A()
 {
 	uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-	if (key[0])
-		V[Vx] = 0;
-	else if (key[1])
-		V[Vx] = 1;
-	else if (key[2])
-		V[Vx] = 2;
-	else if (key[3])
-		V[Vx] = 3;
-	else if (key[4])
-		V[Vx] = 4;
-	else if (key[5])
-		V[Vx] = 5;
-	else if (key[6])
-		V[Vx] = 6;
-	else if (key[7])
-		V[Vx] = 7;
-	else if (key[8])
-		V[Vx] = 8;
-	else if (key[9])
-		V[Vx] = 9;
-	else if (key[10])
-		V[Vx] = 10;
-	else if (key[11])
-		V[Vx] = 11;
-	else if (key[12])
-		V[Vx] = 12;
-	else if (key[13])
-		V[Vx] = 13;
-	else if (key[14])
-		V[Vx] = 14;
-	else if (key[15])
-		V[Vx] = 15;
-	else
-		pc -= 2;
+	bool keyPressed = false;
+
+	for (int i = 0; i < 16; ++i)
+	{
+		if (key[i] != 0)
+		{
+			V[Vx] = i;
+			keyPressed = true;
+		}
+	}
+
+	if (!keyPressed) pc -= 2;
 }
 
 void Chip8::Opcode_Fx15()
@@ -497,7 +481,10 @@ void Chip8::EmulateCycle()
 	pc += 2;
 
 	(this->*opcodes_0xxx_Fxxx[(opcode & 0xF000u) >> 12u])();
+}
 
+void Chip8::TimerCycle()
+{
 	if (delayTimer > 0)
 		--delayTimer;
 
@@ -512,17 +499,15 @@ void Chip8::LoadRom(const char* filename)
 	if (file.is_open())
 	{
 		std::streampos size = file.tellg();
-		char* buffer = new char[size];
+		std::vector<uint8_t> buffer(size);
 
 		file.seekg(0, std::ios::beg);
-		file.read(buffer, size);
+		file.read(reinterpret_cast<char*>(buffer.data()), size);
 		file.close();
 
-		for (long i = 0; i < size; ++i)
+		for (int i = 0; i < size; ++i)
 		{
 			memory[START_ADDRESS + i] = buffer[i];
 		}
-
-		delete[] buffer;
 	}
 }

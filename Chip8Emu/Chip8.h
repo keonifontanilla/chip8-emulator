@@ -20,6 +20,7 @@ public:
 	~Chip8();
 
 	void EmulateCycle();
+	void TimerCycle();
 	void LoadRom(const char* filename);
 
 private:
