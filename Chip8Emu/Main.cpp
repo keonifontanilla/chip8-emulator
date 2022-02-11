@@ -8,11 +8,21 @@ using Clock = std::chrono::high_resolution_clock;
 
 int main(int argc, char **argv)
 {
+    if (argc < 2)
+    {
+        std::cerr << "Usage: " << argv[0] << std::endl;
+        return 1;
+    }
     const char* romFileName = argv[1];
 
     Graphics graphics(DISPLAY_WIDTH, DISPLAY_HEIGHT);
     Chip8 chip8;
-    chip8.LoadRom(romFileName);
+
+    if (!chip8.LoadRom(romFileName))
+    {
+        std::cerr << "Failed to load rom." << std::endl;
+        return 1;
+    }
 
     bool quit = false;
 

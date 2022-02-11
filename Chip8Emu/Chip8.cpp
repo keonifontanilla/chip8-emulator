@@ -492,9 +492,11 @@ void Chip8::TimerCycle()
 		--soundTimer;
 }
 
-void Chip8::LoadRom(const char* filename)
+bool Chip8::LoadRom(const char* filename)
 {
 	std::ifstream file(filename, std::ios::binary | std::ios::ate);
+
+	if (!file) return false;
 
 	if (file.is_open())
 	{
@@ -510,4 +512,8 @@ void Chip8::LoadRom(const char* filename)
 			memory[START_ADDRESS + i] = buffer[i];
 		}
 	}
+	else
+		return false;
+
+	return true;
 }

@@ -21,7 +21,7 @@ public:
 
 	void EmulateCycle();
 	void TimerCycle();
-	void LoadRom(const char* filename);
+	bool LoadRom(const char* filename);
 
 private:
 	uint8_t memory[4096];
