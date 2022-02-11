@@ -22,7 +22,8 @@ int main(int argc, char **argv)
 
     int fps = 60;
     int framerate = 1000 / fps;
-    int instructionsPerStep = 15;
+    int instructionsPerStep = 8;
+    int delay = 10;
 
     while (!quit)
     {
@@ -30,26 +31,27 @@ int main(int argc, char **argv)
         auto time = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - t1).count();
         auto timePassed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTime).count();
 
-        for (int i = 0; i < instructionsPerStep; ++i)
-        {
-            chip8.EmulateCycle();
-            counter++;
-            std::cout << "Cycle Count: " << counter << " TimePassed: " << time << std::endl;
-        }
+        quit = graphics.HandleEvents(chip8.key);
 
         if (timePassed >= framerate)
         {
             startTime = currentTime;
+
+            for (int i = 0; i < instructionsPerStep; ++i)
+            {
+                chip8.EmulateCycle();
+                counter++;
+                std::cout << "Cycle Count: " << counter << " TimePassed: " << time << std::endl;
+            }
+
             chip8.TimerCycle();
 
             if (chip8.drawflag)
             {
                 graphics.Update(chip8.display);
                 chip8.drawflag = false;
-                SDL_Delay(10);
+                SDL_Delay(delay);
             }
-
-            quit = graphics.HandleEvents(chip8.key);
         }
     }
 
